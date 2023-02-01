@@ -30,6 +30,8 @@ local utils = require'bufferline.utils'
 
 --- @alias bufferline.buffer.activity 1|2|3|4
 
+--- @alias bufferline.buffer.activity.name 'Inactive'|'Alternate'|'Visible'|'Current'
+
 --- The character used to delimit paths (e.g. `/` or `\`).
 local separator = package.config:sub(1,1)
 
@@ -45,14 +47,14 @@ local function terminalname(name)
 end
 
 --- @param buffer_number integer
---- @return bufferline.buffer.activity # whether `bufnr` is inactive, visible, the alternate file, or currently selected (in that order).
+--- @return bufferline.buffer.activity # whether `bufnr` is inactive, the alternate file, visible, or currently selected (in that order).
 local function get_activity(buffer_number)
   if get_current_buf() == buffer_number then
     return 4
   elseif options.highlight_alternate() and bufnr('#') == buffer_number then
-    return 3
-  elseif options.highlight_visible() and bufwinnr(buffer_number) ~= -1 then
     return 2
+  elseif options.highlight_visible() and bufwinnr(buffer_number) ~= -1 then
+    return 3
   end
 
   return 1

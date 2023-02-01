@@ -44,6 +44,26 @@ local utils = require'bufferline.utils'
 --- @type bufferline.buffer
 local Buffer = require'bufferline.buffer'
 
+local ESC = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
+
+--- Initialize the buffer pick mode.
+--- @param fn fun()
+local function pick_buffer_wrap(fn)
+  if JumpMode.reinitialize then
+    JumpMode.initialize_indexes()
+  end
+
+  state.is_picking_buffer = true
+  render.update()
+  command('redrawtabline')
+
+  fn()
+
+  state.is_picking_buffer = false
+  render.update()
+  command('redrawtabline')
+end
+
 --- Shows an error that `bufnr` was not among the `state.buffers`
 --- @param bufnr integer
 local function notify_buffer_not_found(bufnr)
@@ -91,7 +111,7 @@ end
 --- Close all open buffers, except those in visible windows.
 function api.close_all_but_visible()
   for _, bufnr in ipairs(state.buffers) do
-    if Buffer.get_activity(bufnr) < 2 then
+    if Buffer.get_activity(bufnr) < 3 then
       bbye.bdelete(false, bufnr)
     end
   end
@@ -365,34 +385,49 @@ end
 
 --- Activate the buffer pick mode.
 function api.pick_buffer()
-  if JumpMode.reinitialize then
-    JumpMode.initialize_indexes()
-  end
+  pick_buffer_wrap(function()
+    local ok, byte = pcall(getchar)
+    if ok then
+      local letter = char(byte)
 
-  state.is_picking_buffer = true
-
-  render.update()
-  command('redrawtabline')
-
-  state.is_picking_buffer = false
-
-  local ok, byte = pcall(getchar)
-  if ok then
-    local letter = char(byte)
-
-    if letter ~= '' then
-      if JumpMode.buffer_by_letter[letter] ~= nil then
-        set_current_buf(JumpMode.buffer_by_letter[letter])
-      else
-        notify("Couldn't find buffer", vim.log.levels.WARN, {title = 'barbar.nvim'})
+      if letter ~= '' then
+        if JumpMode.buffer_by_letter[letter] ~= nil then
+          set_current_buf(JumpMode.buffer_by_letter[letter])
+        else
+          notify("Couldn't find buffer", vim.log.levels.WARN, {title = 'barbar.nvim'})
+        end
       end
+    else
+      notify("Invalid input", vim.log.levels.WARN, {title = 'barbar.nvim'})
     end
-  else
-    notify("Invalid input", vim.log.levels.WARN, {title = 'barbar.nvim'})
-  end
+  end)
+end
 
-  render.update()
-  command('redrawtabline')
+--- Activate the buffer pick delete mode.
+function api.pick_buffer_delete()
+  pick_buffer_wrap(function()
+    while true do
+      local ok, byte = pcall(getchar)
+      if ok then
+        local letter = char(byte)
+
+        if letter ~= '' then
+          if JumpMode.buffer_by_letter[letter] ~= nil then
+            bbye.bdelete(false, JumpMode.buffer_by_letter[letter])
+          elseif letter == ESC then
+            break
+          else
+            notify("Couldn't find buffer", vim.log.levels.WARN, {title = 'barbar.nvim'})
+          end
+        end
+      else
+        notify("Invalid input", vim.log.levels.WARN, {title = 'barbar.nvim'})
+      end
+
+      render.update()
+      command('redrawtabline')
+    end
+  end)
 end
 
 --- Offset the rendering of the bufferline

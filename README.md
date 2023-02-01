@@ -39,7 +39,7 @@ Plug 'romgrk/barbar.nvim'
 #### Using [packer.nvim](https://github.com/wbthomason/packer.nvim)
 ```lua
 use 'nvim-tree/nvim-web-devicons'
-use {'romgrk/barbar.nvim', wants = 'nvim-web-devicons'}
+use {'romgrk/barbar.nvim', requires = 'nvim-web-devicons'}
 ```
 
 You can skip the dependency on `'nvim-tree/nvim-web-devicons'` if you
@@ -112,9 +112,11 @@ not mess your window layout.
 " Move to previous/next
 nnoremap <silent>    <A-,> <Cmd>BufferPrevious<CR>
 nnoremap <silent>    <A-.> <Cmd>BufferNext<CR>
+
 " Re-order to previous/next
 nnoremap <silent>    <A-<> <Cmd>BufferMovePrevious<CR>
 nnoremap <silent>    <A->> <Cmd>BufferMoveNext<CR>
+
 " Goto buffer in position...
 nnoremap <silent>    <A-1> <Cmd>BufferGoto 1<CR>
 nnoremap <silent>    <A-2> <Cmd>BufferGoto 2<CR>
@@ -126,10 +128,13 @@ nnoremap <silent>    <A-7> <Cmd>BufferGoto 7<CR>
 nnoremap <silent>    <A-8> <Cmd>BufferGoto 8<CR>
 nnoremap <silent>    <A-9> <Cmd>BufferGoto 9<CR>
 nnoremap <silent>    <A-0> <Cmd>BufferLast<CR>
+
 " Pin/unpin buffer
 nnoremap <silent>    <A-p> <Cmd>BufferPin<CR>
+
 " Close buffer
 nnoremap <silent>    <A-c> <Cmd>BufferClose<CR>
+
 " Wipeout buffer
 "                          :BufferWipeout
 " Close commands
@@ -139,8 +144,11 @@ nnoremap <silent>    <A-c> <Cmd>BufferClose<CR>
 "                          :BufferCloseAllButCurrentOrPinned
 "                          :BufferCloseBuffersLeft
 "                          :BufferCloseBuffersRight
+
 " Magic buffer-picking mode
 nnoremap <silent> <C-p>    <Cmd>BufferPick<CR>
+nnoremap <silent> <C-p>    <Cmd>BufferPickDelete<CR>
+
 " Sort automatically by...
 nnoremap <silent> <Space>bb <Cmd>BufferOrderByBufferNumber<CR>
 nnoremap <silent> <Space>bd <Cmd>BufferOrderByDirectory<CR>
@@ -244,6 +252,9 @@ let bufferline.hide = {'extensions': v:true, 'inactive': v:true}
 " Disable highlighting alternate buffers
 let bufferline.highlight_alternate = v:false
 
+" Disable highlighting file icons in inactive buffers
+let bufferline.highlight_inactive_file_icons = v:false
+
 " Enable highlighting visible buffers
 let bufferline.highlight_visible = v:true
 
@@ -342,6 +353,9 @@ require'bufferline'.setup {
 
   -- Disable highlighting alternate buffers
   highlight_alternate = false,
+
+  -- Disable highlighting file icons in inactive buffers
+  highlight_inactive_file_icons = false,
 
   -- Enable highlighting visible buffers
   highlight_visible = true,
